@@ -1,5 +1,5 @@
-# Building an AJAX File Uploader with NodeJs
+# Style Transfer Server
 
-This code is for the tutorial on building an AJAX file uploader with NodeJs, express, and formidable.
+Server for uploading images to be processed by TensorFlow for style transfer
 
-Check out the full tutorial at [coligo](http://coligo.io/building-ajax-file-uploader-with-node/)
+Based on AJAX File Uploader tutorial at [coligo](http://coligo.io/building-ajax-file-uploader-with-node/)
