@@ -1,15 +1,14 @@
 {
-  "name": "file-uploader",
+  "name": "style-transfer",
   "version": "1.0.0",
-  "description": "An AJAX file uploader using JS and NodeJS",
-  "main": "app.js",
+  "description": "Server for uploading images to be processed by TensorFlow for style transfer",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Fady Makram",
-  "license": "MIT",
+  "author": "Arthur Nishimoto",
   "dependencies": {
     "express": "^4.13.3",
-    "formidable": "^1.0.17"
+    "formidable": "^1.0.17",
+	"python-shell": "^0.4.0"
   }
 }
