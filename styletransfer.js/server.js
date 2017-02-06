@@ -9,8 +9,13 @@ var PythonShell = require('python-shell');
 var uploadPath = '/uploads';
 var processedPath = '/processed';
 
-var pythonExecutable = '/home/evl/anishi2/bin/python3.5';
-var pythonScriptPath = "/data/evl/anishi2/cs523/neural-style/";
+//   /* arthur's paths */
+//   var pythonExecutable = '/home/evl/anishi2/bin/python3.5';
+//   var pythonScriptPath = "/data/evl/anishi2/cs523/neural-style/";
+
+/* kristine's paths */
+var pythonExecutable = "/usr/bin/python"
+var pythonScriptPath = "/Users/kristinelee/Desktop/class/523/p1/neural-style-master/";
 var pythonScript = "neural_style.py"
 var pythonNetworkPath = pythonScriptPath+"imagenet-vgg-verydeep-19.mat"
 
@@ -67,11 +72,16 @@ app.post('/upload', function(req, res){
 		pythonScriptPath+pythonScript,
 	 	"--content", form.uploadDir+"/"+file.name,
 	 	"--styles", pythonScriptPath+"style1.jpg",
-	 	"--output", processedImageDir+"/"+"testOutput.jpg",
-	 	"--iterations", 100,
+	 	"--output", processedImageDir+"/"+file.name,
+	 	"--iterations", /*100,*/ 2,
 		"--network", pythonNetworkPath
 	]
-	const scriptExecution = spawn("ssh", pythonArgs);
+
+//   /* running on lyra */
+//   const scriptExecution = spawn("ssh", pythonArgs);
+
+    /* running on local */
+    const scriptExecution = spawn("python", pythonArgs.slice(3));
 	
 	// Handle normal output
 	scriptExecution.stdout.on('data', (data) => {
@@ -87,18 +97,6 @@ app.post('/upload', function(req, res){
 	scriptExecution.on('exit', (code) => {
 		console.log("Process quit with code : " + code);
 	});
-
-	// pythonOptions.args = [
-	// 	"--content " + file.name,
-	// 	"--style " + "style1.jpg",
-	// 	"--output " + "testOuput.jpg",
-	// 	"--iterations " + "100"
-	// ];
-	// PythonShell.run(pythonScript, pythonOptions, function (err, results) {
-	// 	if (err) throw err;
-	// 	// results is an array consisting of messages collected during execution
-	// 	console.log('results: %j', results);
-	// });
 
   });
 
