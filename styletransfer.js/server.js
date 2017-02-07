@@ -11,12 +11,12 @@ var uploadPath = '/uploads';
 var processedPath = '/processed';
 
 //   /* arthur's paths */
-//   var pythonExecutable = '/home/evl/anishi2/bin/python3.5';
-//   var pythonScriptPath = "/data/evl/anishi2/cs523/neural-style/";
+var pythonExecutable = '/home/evl/anishi2/bin/python3.5';
+var pythonScriptPath = "/data/evl/anishi2/cs523/CS523Project1/";
 
 /* kristine's paths */
-var pythonExecutable = "/usr/bin/python"
-var pythonScriptPath = "/Users/kristinelee/Desktop/class/523/p1/neural-style-master/";
+//var pythonExecutable = "/usr/bin/python"
+//var pythonScriptPath = "/Users/kristinelee/Desktop/class/523/p1/neural-style-master/";
 var pythonScript = "neural_style.py"
 var pythonNetworkPath = pythonScriptPath+"imagenet-vgg-verydeep-19.mat"
 
@@ -87,16 +87,17 @@ app.post('/upload', function(req, res){
 	 	"--content", contentPath,
 	 	"--styles", stylePath,
 	 	"--output", processedImageDir+"/"+file.name,
-	 	"--iterations", /*100,*/ 2,
+	 	"--iterations", 100,
 		"--network", pythonNetworkPath
 	]
-
+	
+	console.log('running...');
+	console.log(pythonArgs);
 //   /* running on lyra */
-//   const scriptExecution = spawn("ssh", pythonArgs);
+   const scriptExecution = spawn("ssh", pythonArgs);
 
     /* running on local */
-    console.log('running...');
-    const scriptExecution = spawn("python", pythonArgs.slice(3));
+    //const scriptExecution = spawn("python", pythonArgs.slice(3));
 	
 	// Handle normal output
 	scriptExecution.stdout.on('data', (data) => {
