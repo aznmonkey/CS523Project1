@@ -39,23 +39,8 @@ var pythonOptions = {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-var io;
-
 app.get('/', function(req, res){
-
-    io = socketio.listen(res);
-    io.sockets.on('connection', function(socket) {
-        fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
-          if (filename) {
-            socket.emit('fileUploaded', { file: path.join(__dirname, processedPath) + '/' + filename });
-          } else {
-            console.log('filename not provided');
-          }
-        });    
-        res.sendFile(path.join(__dirname, 'views/index.html'));
-
-    })
-
+    res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
 app.post('/upload', function(req, res){
@@ -148,3 +133,23 @@ app.post('/upload', function(req, res){
 var server = app.listen(10523, function(){
   console.log('Server listening on port 10523');
 });
+
+const io = socketio(server);
+io.on('connection', function(socket) {
+    fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
+
+      if (filename) {
+        fs.readFile(path.join(__dirname, processedPath) + '/' + filename, function(err, data) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                socket.emit('fileUploaded', { file: processedPath + '/' + filename, image: data });
+            }
+        })
+      } else {
+        console.log('filename not provided');
+      }
+    });    
+})
+

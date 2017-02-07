@@ -17,6 +17,7 @@
     cursor:pointer;
   }
   .file-drop {
+    z-index:20;
     font-weight:bold;
     font-size:14px;
     line-height:1.4em;
@@ -91,6 +92,25 @@
     margin-top:5px;
   }
 
+  #newFile {
+    left:0;
+    top:0;
+    display:none;
+    z-index:5;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    position:fixed;
+  }
+  #newFile img {
+    max-width:100%;
+    height:auto;
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+  }
+
   </style>
 </head>
 <body>
@@ -98,7 +118,7 @@
 <div id="content">
   <p>
     <div class="file-drop">
-      <input id="content-input" type="file">
+      <input id="content-input" type="file" accept="image/jpeg">
       <div class="text" id="content-input-label">
         Add content image
       </div>
@@ -108,7 +128,7 @@
 <div id="style">
   <p>
     <div class="file-drop">
-      <input id="style-input" type="file">
+      <input id="style-input" type="file" accept="image/jpeg">
       <div class="text" id="style-input-label">
         Add style image
       </div>
@@ -121,6 +141,9 @@
   <div id="error">Upload two images</div>
   <button id="render">render</button>
   <div id="progress"></div>
+</div>
+
+<div id="newFile">
 </div>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
