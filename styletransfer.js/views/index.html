@@ -8,23 +8,121 @@
   <title>CS 523 Style Transfer</title>
   <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
   <style>
-  body { font: 16px/1.5em Raleway, helvetica; }
+  body { font: 16px/1.5em helvetica; height:100%; }
+  input[type="file"] {
+    opacity:0;
+    display:block;
+    width:160px;
+    height:40px;
+    cursor:pointer;
+  }
+  .file-drop {
+    font-weight:bold;
+    font-size:14px;
+    line-height:1.4em;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-font-smoothing:antialiased;
+    color:white;
+    background:indigo;
+    display:inline-block;
+    position:relative;
+    border-radius:5px;
+  }
+  .file-drop .text {
+    pointer-events:none;
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:100%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+  }
+
+  #content, #style {
+    width:160px;
+    position:absolute;
+    top:0;
+    padding:0 20px;
+  }
+  #content-input-preview, #style-input-preview {
+    top:0;
+    position:absolute;
+    z-index:-1;
+    width:50%;
+    height:100%;
+    background-size:cover;
+    background-position: center center;
+  }
+  #content, #content-input-preview {
+    left:0;
+  }
+  #style, #style-input-preview {
+    right:0;
+  }
+
+  #renderdiv {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align: center;
+    margin-top:-40px;    
+    width:200px;
+  }
+  #error {
+    color:crimson;
+    visibility:hidden;
+    font-size:14px;
+  }
+  #render {
+    width:100%;
+    height:40px;
+    background:white;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+  }
+  #progress {
+    width:0%;
+    height:5px;
+    background-color:skyblue;
+    border-top:1px solid white;
+    margin-top:5px;
+  }
+
   </style>
 </head>
 <body>
 
-<div>
-  <h3>Content image</h3>
+<div id="content">
   <p>
-    <input id="content-input" type="file">
-  </p>
-
-  <h3>Style image</h3>
-  <p>
-    <input id="style-input" type="file">
+    <div class="file-drop">
+      <input id="content-input" type="file">
+      <div class="text" id="content-input-label">
+        Add content image
+      </div>
+    </div>
   </p>
 </div>
-
+<div id="style">
+  <p>
+    <div class="file-drop">
+      <input id="style-input" type="file">
+      <div class="text" id="style-input-label">
+        Add style image
+      </div>
+    </div>
+  </p>
+</div>
+<div id="content-input-preview"></div>
+<div id="style-input-preview"></div>
+<div id="renderdiv">
+  <div id="error">Upload two images</div>
+  <button id="render">render</button>
+  <div id="progress"></div>
+</div>
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="javascripts/upload2.js"></script>
 </body>

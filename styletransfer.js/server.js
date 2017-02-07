@@ -3,6 +3,7 @@ var app = express();
 var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
+var socketio = require('socket.io');
 // Use python shell
 var PythonShell = require('python-shell');
 
@@ -36,11 +37,25 @@ var pythonOptions = {
     args: []
 };
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
+var io;
+
 app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname, 'views/index.html'));
+
+    io = socketio.listen(res);
+    io.sockets.on('connection', function(socket) {
+        fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
+          if (filename) {
+            socket.emit('fileUploaded', { file: path.join(__dirname, processedPath) + '/' + filename });
+          } else {
+            console.log('filename not provided');
+          }
+        });    
+        res.sendFile(path.join(__dirname, 'views/index.html'));
+
+    })
+
 });
 
 app.post('/upload', function(req, res){
@@ -54,14 +69,28 @@ app.post('/upload', function(req, res){
   // store all uploads in the /uploads directory
   form.uploadDir = path.join(__dirname, uploadPath);
 	
-	var processedImageDir = path.join(__dirname, processedPath);
-	
+  var processedImageDir = path.join(__dirname, processedPath);
+
+  var contentPath = null;
+  var stylePath = null;
+
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
+    var newPath = form.uploadDir + '/' + field + '/' + file.name;
+    fs.rename(file.path, newPath);
+    if (field == 'content') {
+        contentPath = newPath;
+    }
+    else {
+        stylePath = newPath;
+    }
 	
 	const spawn = require('child_process').spawn;
+
+    if (!contentPath || !stylePath) { 
+        return; 
+    }
 	
 	// Lyra SSH version
 	pythonArgs = 
@@ -70,8 +99,8 @@ app.post('/upload', function(req, res){
 		"nohup",
 		pythonExecutable,
 		pythonScriptPath+pythonScript,
-	 	"--content", form.uploadDir+"/"+file.name,
-	 	"--styles", pythonScriptPath+"style1.jpg",
+	 	"--content", contentPath,
+	 	"--styles", stylePath,
 	 	"--output", processedImageDir+"/"+file.name,
 	 	"--iterations", /*100,*/ 2,
 		"--network", pythonNetworkPath
@@ -81,6 +110,7 @@ app.post('/upload', function(req, res){
 //   const scriptExecution = spawn("ssh", pythonArgs);
 
     /* running on local */
+    console.log('running...');
     const scriptExecution = spawn("python", pythonArgs.slice(3));
 	
 	// Handle normal output
