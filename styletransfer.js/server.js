@@ -87,7 +87,7 @@ app.post('/upload', function(req, res){
 	 	"--content", contentPath,
 	 	"--styles", stylePath,
 	 	"--output", processedImageDir+"/"+file.name,
-	 	"--iterations", /*100,*/ 2,
+	 	"--iterations", /*100,*/ 1,
 		"--network", pythonNetworkPath
 	]
 
@@ -100,13 +100,15 @@ app.post('/upload', function(req, res){
 	
 	// Handle normal output
 	scriptExecution.stdout.on('data', (data) => {
-		console.log(uint8arrayToString(data));
+		console.log('out',uint8arrayToString(data));
+        outputData(data);
 	});
 
 	// Handle error output
 	scriptExecution.stderr.on('data', (data) => {
 		// As said before, convert the Uint8Array to a readable string.
-		console.log(uint8arrayToString(data));
+		console.log('err',uint8arrayToString(data));
+        outputData(data);
 	});
 
 	scriptExecution.on('exit', (code) => {
@@ -133,23 +135,16 @@ app.post('/upload', function(req, res){
 var server = app.listen(10523, function(){
   console.log('Server listening on port 10523');
 });
-
 const io = socketio(server);
-io.on('connection', function(socket) {
-    fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
-
-      if (filename) {
-        fs.readFile(path.join(__dirname, processedPath) + '/' + filename, function(err, data) {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                socket.emit('fileUploaded', { file: processedPath + '/' + filename, image: data });
-            }
-        })
-      } else {
-        console.log('filename not provided');
-      }
-    });    
+let socket;
+io.on('connection', function(s) {
+    socket = s;
 })
 
+function outputData(data) {
+    let s = uint8arrayToString(data);
+    console.log(s || data);
+    if (socket) {
+        socket.emit('fileUploaded', {image: data});
+    }
+}

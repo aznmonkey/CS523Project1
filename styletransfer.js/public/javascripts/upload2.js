@@ -122,7 +122,8 @@
 
   var socket = io.connect();
   socket.on('fileUploaded', function(data) {
-    if (data.file) {
+    console.log(data.image);
+    if (data.image) {
 
       let newFileContainer = document.getElementById('newFile');
       newFileContainer.innerHTML = '<img src="' + arrayBufferToDataUri(data.image) + '">';
