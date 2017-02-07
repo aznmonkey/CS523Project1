@@ -22,7 +22,7 @@ var pythonNetworkPath = pythonScriptPath+"imagenet-vgg-verydeep-19.mat"
 
 // Set environment variables
 // LD_LIBRARY_PATH is not read by default? (not needed if using ssh)
-//process.env.LD_LIBRARY_PATH = "/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64";
+process.env.LD_LIBRARY_PATH = "/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64";
 
 // Function to convert an Uint8Array to a string
 var uint8arrayToString = function(data){
@@ -95,13 +95,17 @@ app.post('/upload', function(req, res){
 	console.log(pythonArgs);
 //   /* running on lyra */
    const scriptExecution = spawn("ssh", pythonArgs);
-
+	//const scriptExecution = spawn(pythonExecutable, pythonArgs.slice(3));
+	
     /* running on local */
     //const scriptExecution = spawn("python", pythonArgs.slice(3));
 	
 	// Handle normal output
 	scriptExecution.stdout.on('data', (data) => {
+		s && s.emit("fileUploaded", {file: "blah", image: data});
+
 		console.log(uint8arrayToString(data));
+		console.log(data);
 	});
 
 	// Handle error output
@@ -112,7 +116,17 @@ app.post('/upload', function(req, res){
 
 	scriptExecution.on('exit', (code) => {
 		console.log("Process quit with code : " + code);
-	});
+		fs.readFile(path.join(__dirname, processedPath) + '/' +  file.name, function(err, data) {
+            if (err) {
+                console.log(err);
+				return;
+            }
+            else {
+                s.emit('fileUploaded', { file: processedPath + '/' +  file.name, image: data });
+            }
+        })
+
+		});
 
   });
 
@@ -136,21 +150,15 @@ var server = app.listen(10523, function(){
 });
 
 const io = socketio(server);
+let s;
 io.on('connection', function(socket) {
+	s = socket;
     fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
 
       if (filename) {
-        fs.readFile(path.join(__dirname, processedPath) + '/' + filename, function(err, data) {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                socket.emit('fileUploaded', { file: processedPath + '/' + filename, image: data });
-            }
-        })
+
       } else {
         console.log('filename not provided');
       }
     });    
 })
-

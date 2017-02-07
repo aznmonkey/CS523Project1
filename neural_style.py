@@ -137,7 +137,6 @@ def main():
         else:
             output_file = options.output
 
-        #print(output_file)
         if output_file:
             imsave(output_file, image)
             combine_image(options.content, output_file)
@@ -152,7 +151,9 @@ def imread(path):
 
 
 def imsave(path, img):
+    #print("Saving to " + str(path))
     img = np.clip(img, 0, 255).astype(np.uint8)
+    #print (img)
     scipy.misc.imsave(path, img)
 
 def concat_images(imga, imgb):
@@ -161,12 +162,12 @@ def concat_images(imga, imgb):
         """
         ha, wa = imga.shape[:2]
         hb, wb = imgb.shape[:2]
-        print(imga.shape)
-        print(imgb.shape)
-        print(ha)
-        print(wa)
-        print(hb)
-        print(wa)
+        #print(imga.shape)
+        #print(imgb.shape)
+        #print(ha)
+        #print(wa)
+        #print(hb)
+        #print(wa)
         max_height = np.max([ha, hb])
         total_width = wa + wb
         new_img = np.zeros(shape=(max_height, total_width, 3), dtype=np.float32)

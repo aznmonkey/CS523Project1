@@ -117,12 +117,14 @@
             c = (chunk & 15) << 2;
             base64 += encodings[a] + encodings[b] + encodings[c] + '=';
         }
+		console.log(base64);
         return "data:image/jpeg;base64," + base64;
     }
 
   var socket = io.connect();
-  socket.on('fileUploaded', function(data) {
-    if (data.file) {
+	socket.on('fileUploaded', function(data) {
+		console.log("fileUploaded", data.image);
+    if (data.image) {
 
       let newFileContainer = document.getElementById('newFile');
       newFileContainer.innerHTML = '<img src="' + arrayBufferToDataUri(data.image) + '">';
