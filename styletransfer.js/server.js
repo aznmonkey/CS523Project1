@@ -4,6 +4,7 @@ var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
 var socketio = require('socket.io');
+var chokidar = require('chokidar');
 // Use python shell
 var PythonShell = require('python-shell');
 
@@ -87,7 +88,7 @@ app.post('/upload', function(req, res){
 	 	"--content", contentPath,
 	 	"--styles", stylePath,
 	 	"--output", processedImageDir+"/"+file.name,
-	 	"--iterations", 100,
+	 	"--iterations", 10,
 		"--network", pythonNetworkPath
 	]
 	
@@ -126,7 +127,7 @@ app.post('/upload', function(req, res){
             }
         })
 
-		});
+	});
 
   });
 
