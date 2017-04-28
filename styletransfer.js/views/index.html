@@ -7,32 +7,146 @@
 
   <title>CS 523 Style Transfer</title>
   <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-  <link href="css/styles.css" rel="stylesheet">
+  <style>
+  body { font: 16px/1.5em helvetica; height:100%; }
+  input[type="file"] {
+    opacity:0;
+    display:block;
+    width:160px;
+    height:40px;
+    cursor:pointer;
+  }
+  .file-drop {
+    z-index:20;
+    font-weight:bold;
+    font-size:14px;
+    line-height:1.4em;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-font-smoothing:antialiased;
+    color:white;
+    background:indigo;
+    display:inline-block;
+    position:relative;
+    border-radius:5px;
+  }
+  .file-drop .text {
+    pointer-events:none;
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:100%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+  }
+
+  #content, #style {
+    width:160px;
+    position:absolute;
+    top:0;
+    padding:0 20px;
+  }
+  #content-input-preview, #style-input-preview {
+    top:0;
+    position:absolute;
+    z-index:-1;
+    width:50%;
+    height:100%;
+    background-size:cover;
+    background-position: center center;
+  }
+  #content, #content-input-preview {
+    left:0;
+  }
+  #style, #style-input-preview {
+    right:0;
+  }
+
+  #renderdiv {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align: center;
+    margin-top:-40px;    
+    width:200px;
+  }
+  #error {
+    color:crimson;
+    visibility:hidden;
+    font-size:14px;
+  }
+  #render {
+    width:100%;
+    height:40px;
+    background:white;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+  }
+  #progress {
+    width:0%;
+    height:5px;
+    background-color:skyblue;
+    border-top:1px solid white;
+    margin-top:5px;
+  }
+
+  #newFile {
+    left:0;
+    top:0;
+    display:none;
+    z-index:5;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    position:fixed;
+  }
+  #newFile img {
+    max-width:100%;
+    height:auto;
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+  }
+
+  </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-xs-12">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            <span class="glyphicon glyphicon-cloud-upload"></span>
-            <h2>File Uploader</h2>
-            <div class="progress">
-              <div class="progress-bar" role="progressbar"></div>
-            </div>
-            <button class="btn btn-lg upload-btn" type="button">Upload File</button>
-          </div>
-        </div>
+<div id="content">
+  <p>
+    <div class="file-drop">
+      <input id="content-input" type="file" accept="image/jpeg">
+      <div class="text" id="content-input-label">
+        Add content image
       </div>
     </div>
-  </div>
+  </p>
+</div>
+<div id="style">
+  <p>
+    <div class="file-drop">
+      <input id="style-input" type="file" accept="image/jpeg">
+      <div class="text" id="style-input-label">
+        Add style image
+      </div>
+    </div>
+  </p>
+</div>
+<div id="content-input-preview"></div>
+<div id="style-input-preview"></div>
+<div id="renderdiv">
+  <div id="error">Upload two images</div>
+  <button id="render">render</button>
+  <div id="progress"></div>
+</div>
 
-  <input id="upload-input" type="file" name="uploads[]" multiple="multiple"></br>
-
+<div id="newFile">
+</div>
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-  <script src="javascripts/upload.js"></script>
+  <script src="javascripts/upload2.js"></script>
 </body>
 </html>

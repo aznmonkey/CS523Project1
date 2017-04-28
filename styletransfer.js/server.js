@@ -3,20 +3,26 @@ var app = express();
 var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
+var socketio = require('socket.io');
 // Use python shell
 var PythonShell = require('python-shell');
 
 var uploadPath = '/uploads';
 var processedPath = '/processed';
 
+//   /* arthur's paths */
 var pythonExecutable = '/home/evl/anishi2/bin/python3.5';
-var pythonScriptPath = "/data/evl/anishi2/cs523/neural-style/";
+var pythonScriptPath = "/data/evl/anishi2/cs523/CS523Project1/";
+
+/* kristine's paths */
+//var pythonExecutable = "/usr/bin/python"
+//var pythonScriptPath = "/Users/kristinelee/Desktop/class/523/p1/neural-style-master/";
 var pythonScript = "neural_style.py"
 var pythonNetworkPath = pythonScriptPath+"imagenet-vgg-verydeep-19.mat"
 
 // Set environment variables
 // LD_LIBRARY_PATH is not read by default? (not needed if using ssh)
-//process.env.LD_LIBRARY_PATH = "/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64";
+process.env.LD_LIBRARY_PATH = "/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64";
 
 // Function to convert an Uint8Array to a string
 var uint8arrayToString = function(data){
@@ -31,11 +37,10 @@ var pythonOptions = {
     args: []
 };
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
-  res.sendFile(path.join(__dirname, 'views/index.html'));
+    res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
 app.post('/upload', function(req, res){
@@ -49,14 +54,28 @@ app.post('/upload', function(req, res){
   // store all uploads in the /uploads directory
   form.uploadDir = path.join(__dirname, uploadPath);
 	
-	var processedImageDir = path.join(__dirname, processedPath);
-	
+  var processedImageDir = path.join(__dirname, processedPath);
+
+  var contentPath = null;
+  var stylePath = null;
+
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
+    var newPath = form.uploadDir + '/' + field + '/' + file.name;
+    fs.rename(file.path, newPath);
+    if (field == 'content') {
+        contentPath = newPath;
+    }
+    else {
+        stylePath = newPath;
+    }
 	
 	const spawn = require('child_process').spawn;
+
+    if (!contentPath || !stylePath) { 
+        return; 
+    }
 	
 	// Lyra SSH version
 	pythonArgs = 
@@ -65,17 +84,28 @@ app.post('/upload', function(req, res){
 		"nohup",
 		pythonExecutable,
 		pythonScriptPath+pythonScript,
-	 	"--content", form.uploadDir+"/"+file.name,
-	 	"--styles", pythonScriptPath+"style1.jpg",
-	 	"--output", processedImageDir+"/"+"testOutput.jpg",
+	 	"--content", contentPath,
+	 	"--styles", stylePath,
+	 	"--output", processedImageDir+"/"+file.name,
 	 	"--iterations", 100,
 		"--network", pythonNetworkPath
 	]
-	const scriptExecution = spawn("ssh", pythonArgs);
+	
+	console.log('running...');
+	console.log(pythonArgs);
+//   /* running on lyra */
+   const scriptExecution = spawn("ssh", pythonArgs);
+	//const scriptExecution = spawn(pythonExecutable, pythonArgs.slice(3));
+	
+    /* running on local */
+    //const scriptExecution = spawn("python", pythonArgs.slice(3));
 	
 	// Handle normal output
 	scriptExecution.stdout.on('data', (data) => {
+		s && s.emit("fileUploaded", {file: "blah", image: data});
+
 		console.log(uint8arrayToString(data));
+		console.log(data);
 	});
 
 	// Handle error output
@@ -86,19 +116,17 @@ app.post('/upload', function(req, res){
 
 	scriptExecution.on('exit', (code) => {
 		console.log("Process quit with code : " + code);
-	});
+		fs.readFile(path.join(__dirname, processedPath) + '/' +  file.name, function(err, data) {
+            if (err) {
+                console.log(err);
+				return;
+            }
+            else {
+                s.emit('fileUploaded', { file: processedPath + '/' +  file.name, image: data });
+            }
+        })
 
-	// pythonOptions.args = [
-	// 	"--content " + file.name,
-	// 	"--style " + "style1.jpg",
-	// 	"--output " + "testOuput.jpg",
-	// 	"--iterations " + "100"
-	// ];
-	// PythonShell.run(pythonScript, pythonOptions, function (err, results) {
-	// 	if (err) throw err;
-	// 	// results is an array consisting of messages collected during execution
-	// 	console.log('results: %j', results);
-	// });
+		});
 
   });
 
@@ -120,3 +148,17 @@ app.post('/upload', function(req, res){
 var server = app.listen(10523, function(){
   console.log('Server listening on port 10523');
 });
+
+const io = socketio(server);
+let s;
+io.on('connection', function(socket) {
+	s = socket;
+    fs.watch(path.join(__dirname, processedPath), (evt, filename) => {
+
+      if (filename) {
+
+      } else {
+        console.log('filename not provided');
+      }
+    });    
+})
